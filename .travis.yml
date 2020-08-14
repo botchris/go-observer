@@ -13,7 +13,7 @@ before_install:
   if [[ $TRAVIS_GO_VERSION == 1.7* ]]; then make deps; fi
 
 script:
-  - if [[ $TRAVIS_GO_VERSION == 1.7* ]]; then make gometalinter; fi
+  - if [[ $TRAVIS_GO_VERSION == 1.7* ]]; then make linters; fi
   - make test
   - make cover
 
