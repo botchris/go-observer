@@ -146,3 +146,44 @@ Note:
 Please check
 [examples/multiple.go](https://github.com/christophercastro/go-observer/blob/master/examples/multiple.go)
 for a simple example on how to use multiple observers with a single updater.
+
+# Operators
+
+- `All`: determine whether all items emitted meet some criteria.
+- `Buffer`: periodically gather items emitted into bundles and emit these bundles rather than emitting the items one at a time.
+- `Contains`: determine whether a particular item was emitted or not.
+- `Debounce`: only emit an item if a particular timespan has passed without it emitting another item.
+- `Debounce`: emit only those items that pass a predicate test.
+- `Map`: transform the items by applying a function to each item.
+- `Concat`: emit the emissions from two or more source streams without interleaving them.
+- `SkipWhile`: discard items until a specified condition becomes false.
+
+## Example
+
+```go
+stream := observe.MakeOperable(ctx, prop.Observe()).
+    Filter(func (item interface) bool {
+        return item.(int)%2 == 0
+    }).
+    Filter(func (item interface) bool {
+        return item.(int)%8 == 0
+    })
+
+for i := 1; 1 <= 100; i++ {
+   prop.Update(i)
+}
+
+prop.End()
+
+for {
+  select {
+    case <-stream.Changes():
+      val = stream.Next().(int)
+      if val == io.EOF {
+        break
+      }
+
+      fmt.Printf("even value divisible by 8: %d\n", val)
+  }
+}
+```
