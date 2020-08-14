@@ -1,11 +1,7 @@
 # observer
 
-[![License](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://github.com/imkira/go-observer/blob/master/LICENSE.txt)
-[![GoDoc](https://godoc.org/github.com/imkira/go-observer?status.svg)](https://godoc.org/github.com/imkira/go-observer)
-[![Build Status](http://img.shields.io/travis/imkira/go-observer.svg?style=flat)](https://travis-ci.org/imkira/go-observer)
-[![Coverage](https://codecov.io/gh/imkira/go-observer/branch/master/graph/badge.svg)](https://codecov.io/gh/imkira/go-observer)
-[![codebeat badge](https://codebeat.co/badges/28bdd579-8b34-4940-a3e0-35ac52794a42)](https://codebeat.co/projects/github-com-imkira-go-observer)
-[![goreportcard](https://goreportcard.com/badge/github.com/imkira/go-observer)](https://goreportcard.com/report/github.com/imkira/go-observer)
+NOTE: This is a fork from [imkira/go-observer](https://github.com/imkira/go-observer)
+which adds Rx-like operators.
 
 observer is a [Go](http://golang.org) package that aims to simplify the problem
 of channel-based broadcasting of events from one or more publishers to one or
@@ -64,13 +60,13 @@ stable.
 First, you need to install the package:
 
 ```
-go get -u github.com/imkira/go-observer
+go get -u github.com/christophercastro/go-observer
 ```
 
 Then, you need to include it in your source:
 
 ```go
-import "github.com/imkira/go-observer"
+import "github.com/christophercastro/go-observer"
 ```
 
 The package will be imported with ```observer``` as name.
@@ -81,7 +77,7 @@ or more publishers, and observed by one or more observers.
 ## Documentation
 
 For advanced usage, make sure to check the
-[available documentation here](http://godoc.org/github.com/imkira/go-observer).
+[available documentation here](http://godoc.org/github.com/christophercastro/go-observer).
 
 ## Example: Creating a Property
 
@@ -148,5 +144,5 @@ Note:
 ## Example
 
 Please check
-[examples/multiple.go](https://github.com/imkira/go-observer/blob/master/examples/multiple.go)
+[examples/multiple.go](https://github.com/christophercastro/go-observer/blob/master/examples/multiple.go)
 for a simple example on how to use multiple observers with a single updater.
