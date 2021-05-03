@@ -1,12 +1,12 @@
-package observer_test
+package rx_test
 
 import (
 	"context"
-	"io"
 	"testing"
 	"time"
 
 	"github.com/botchris/observer"
+	"github.com/botchris/observer/rx"
 	"github.com/stretchr/testify/require"
 )
 
@@ -16,29 +16,18 @@ func TestOperable_Buffer(t *testing.T) {
 		defer cancel()
 
 		prop := observer.NewProperty(nil)
-		stream := observer.MakeOperable(ctx, prop.Observe()).BufferWithCount(5)
+		stream := rx.MakeOperable(ctx, prop.Observe()).BufferWithCount(5)
 
 		for i := 1; i <= 15; i++ {
 			prop.Update(i)
 		}
 		prop.End()
 
-		// wait for stream to complete
-		<-stream.Done()
+		results := stream.ToSlice()
+		require.Len(t, results, 3)
 
-		packsCount := 0
-		for {
-			<-stream.Changes()
-			value := stream.Next()
-
-			if value == io.EOF {
-				break
-			}
-
-			require.Len(t, value, 5)
-			packsCount++
+		for _, pack := range results {
+			require.Len(t, pack, 5)
 		}
-
-		require.EqualValues(t, 3, packsCount)
 	})
 }

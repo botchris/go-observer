@@ -1,11 +1,16 @@
-package observer
+package rx
+
+import (
+	"context"
+)
 
 type operatorMap struct {
+	ctx    context.Context
 	mapper Mapper
 }
 
 func (o *operatorMap) next(item interface{}, dst chan<- interface{}) bool {
-	send(dst, o.mapper(item))
+	send(dst, o.mapper(o.ctx, item))
 
 	return true
 }
@@ -18,6 +23,7 @@ func (o *Operable) Map(mapper Mapper) *Operable {
 	defer o.mu.Unlock()
 
 	o.operators = append(o.operators, &operatorMap{
+		ctx:    o.ctx,
 		mapper: mapper,
 	})
 

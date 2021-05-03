@@ -1,4 +1,4 @@
-package observer
+package rx
 
 type operatorBufferWithCount struct {
 	size   int

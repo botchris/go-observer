@@ -1,12 +1,12 @@
-package observer_test
+package rx_test
 
 import (
 	"context"
-	"io"
 	"testing"
 	"time"
 
 	"github.com/botchris/observer"
+	"github.com/botchris/observer/rx"
 	"github.com/stretchr/testify/require"
 )
 
@@ -16,8 +16,8 @@ func TestOperable_SkipWhile(t *testing.T) {
 		defer cancel()
 
 		prop := observer.NewProperty(nil)
-		stream := observer.MakeOperable(ctx, prop.Observe()).
-			SkipWhile(func(v interface{}) bool {
+		stream := rx.MakeOperable(ctx, prop.Observe()).
+			SkipWhile(func(_ context.Context, v interface{}) bool {
 				return v.(int) <= 50
 			})
 
@@ -26,14 +26,11 @@ func TestOperable_SkipWhile(t *testing.T) {
 		}
 		prop.End()
 
-		for {
-			<-stream.Changes()
-			v := stream.Next()
-			if v == io.EOF {
-				break
-			}
+		items := stream.ToSlice()
+		require.Greater(t, len(items), 0)
 
-			require.Greater(t, v.(int), 50)
+		for _, item := range items {
+			require.Greater(t, item.(int), 50)
 		}
 	})
 }

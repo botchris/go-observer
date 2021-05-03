@@ -12,15 +12,15 @@ type Property interface {
 	// Value returns the current value for this property.
 	Value() interface{}
 
-	// Update sets a new value for this property.
+	// Update sets new values for this property.
 	// Updating with `io.EOF` will mark this property as "ended",
 	// once ended further calls to Update will no-op
-	Update(value interface{})
+	Update(value ...interface{})
 
 	// Observe returns a newly created Stream for this property.
 	Observe() Stream
 
-	// Emits a io.EOF message, shortcut for `Property.Update(io.EOF)`
+	// End emits a io.EOF message, shortcut for `Property.Update(io.EOF)`
 	End()
 
 	// Done returns a channel that is closed when property reaches a EOF
@@ -46,10 +46,11 @@ type property struct {
 func (p *property) Value() interface{} {
 	p.RLock()
 	defer p.RUnlock()
+
 	return p.state.value
 }
 
-func (p *property) Update(value interface{}) {
+func (p *property) Update(values ...interface{}) {
 	p.Lock()
 	defer p.Unlock()
 
@@ -57,12 +58,14 @@ func (p *property) Update(value interface{}) {
 		return
 	}
 
-	if value == io.EOF {
-		p.ended = true
-		close(p.done)
-	}
+	for _, value := range values {
+		if value == io.EOF {
+			p.ended = true
+			close(p.done)
+		}
 
-	p.state = p.state.update(value)
+		p.state = p.state.update(value)
+	}
 }
 
 func (p *property) Observe() Stream {

@@ -1,4 +1,4 @@
-package observer
+package rx
 
 // Option handles configurable options.
 type Option interface {
@@ -6,7 +6,7 @@ type Option interface {
 }
 
 type options struct {
-	startMode startStrategy
+	startStrategy startStrategy
 }
 
 type funcOption struct {
@@ -17,11 +17,11 @@ func (f *funcOption) apply(o *options) {
 	f.fn(o)
 }
 
-// WithStarStrategy using the Eager strategy means the Operable will start consuming the input right after being created.
-func WithStarStrategy(m startStrategy) Option {
+// WithStartStrategy using the Eager strategy means the Operable will start consuming the input right after being created.
+func WithStartStrategy(m startStrategy) Option {
 	return &funcOption{
 		fn: func(o *options) {
-			o.startMode = m
+			o.startStrategy = m
 		},
 	}
 }

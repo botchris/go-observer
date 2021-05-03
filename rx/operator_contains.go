@@ -1,13 +1,18 @@
-package observer
+package rx
+
+import (
+	"context"
+)
 
 type operatorContains struct {
+	ctx       context.Context
 	predicate Predicate
 	contains  bool
 	stopped   bool
 }
 
 func (o *operatorContains) next(item interface{}, dst chan<- interface{}) bool {
-	if !o.stopped && o.predicate(item) {
+	if !o.stopped && o.predicate(o.ctx, item) {
 		o.contains = true
 		o.stopped = true
 		send(dst, true)
@@ -30,6 +35,7 @@ func (o *Operable) Contains(predicate Predicate) *Operable {
 	defer o.mu.Unlock()
 
 	o.operators = append(o.operators, &operatorContains{
+		ctx:       o.ctx,
 		predicate: predicate,
 	})
 

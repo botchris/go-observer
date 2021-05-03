@@ -1,11 +1,16 @@
-package observer
+package rx
+
+import (
+	"context"
+)
 
 type operatorFilter struct {
+	ctx       context.Context
 	predicate Predicate
 }
 
 func (o *operatorFilter) next(item interface{}, dst chan<- interface{}) bool {
-	if o.predicate(item) {
+	if o.predicate(o.ctx, item) {
 		send(dst, item)
 
 		return true
@@ -22,6 +27,7 @@ func (o *Operable) Filter(predicate Predicate) *Operable {
 	defer o.mu.Unlock()
 
 	o.operators = append(o.operators, &operatorFilter{
+		ctx:       o.ctx,
 		predicate: predicate,
 	})
 

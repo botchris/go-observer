@@ -1,4 +1,4 @@
-package observer_test
+package rx_test
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/botchris/observer"
+	"github.com/botchris/observer/rx"
 	"github.com/stretchr/testify/require"
 )
 
@@ -15,7 +16,7 @@ func TestFactory_Concat(t *testing.T) {
 	p1 := observer.NewProperty(nil)
 	p2 := observer.NewProperty(nil)
 
-	stream := observer.Concat(ctx, []observer.Stream{p1.Observe(), p2.Observe()})
+	stream := rx.Concat(ctx, []observer.Stream{p1.Observe(), p2.Observe()})
 
 	var wg sync.WaitGroup
 

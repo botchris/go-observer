@@ -157,6 +157,18 @@ for a simple example on how to use multiple observers with a single updater.
 - `Map`: transform the items by applying a function to each item.
 - `Concat`: emit the emissions from two or more source streams without interleaving them.
 - `SkipWhile`: discard items until a specified condition becomes false.
+- `IgnoreElements`: do not emit any items but mirror its termination notification.
+- `Last`: emit only the last item.
+- `LastOrDefault`: emit only the last item. If fails to emit any items, it emits a default value.
+- `Max`: determines and emits the maximum-valued item according to a comparator.
+- `Min`: determines and emits the minimum-valued item according to a comparator.
+- `Timestamp`: attaches a timestamp to each item indicating when it was emitted.
+- `ToSlice`: collects every emitted item until EOF is reached an returns an slice holding each collected item.
+- `ToMap`: convert the sequence of emitted items into a map keyed by a specified key function.
+- `GroupBy`: divides an Operable into a set of Operable that each emit a different group of items from the original Operable, organized by key.
+- `Distinct`: suppresses duplicate items.
+- `DistinctUntilChanged`: suppresses consecutive duplicate items.
+- `Count`: counts the number of items emitted and emit only this value.
 
 ## Example
 

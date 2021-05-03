@@ -1,12 +1,17 @@
-package observer
+package rx
+
+import (
+	"context"
+)
 
 type operatorAll struct {
+	ctx       context.Context
 	predicate Predicate
 	all       bool
 }
 
 func (o *operatorAll) next(item interface{}, dst chan<- interface{}) bool {
-	if !o.predicate(item) {
+	if !o.predicate(o.ctx, item) {
 		o.all = false
 	}
 
@@ -23,6 +28,7 @@ func (o *Operable) All(predicate Predicate) *Operable {
 	defer o.mu.Unlock()
 
 	o.operators = append(o.operators, &operatorAll{
+		ctx:       o.ctx,
 		predicate: predicate,
 		all:       true,
 	})

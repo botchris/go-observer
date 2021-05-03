@@ -1,6 +1,11 @@
-package observer
+package rx
+
+import (
+	"context"
+)
 
 type operatorSkipWhile struct {
+	ctx       context.Context
 	predicate Predicate
 	skip      bool
 }
@@ -12,7 +17,7 @@ func (o *operatorSkipWhile) next(item interface{}, dst chan<- interface{}) bool 
 		return true
 	}
 
-	if !o.predicate(item) {
+	if !o.predicate(o.ctx, item) {
 		o.skip = false
 		send(dst, item)
 
@@ -30,6 +35,7 @@ func (o *Operable) SkipWhile(predicate Predicate) *Operable {
 	defer o.mu.Unlock()
 
 	o.operators = append(o.operators, &operatorSkipWhile{
+		ctx:       o.ctx,
 		predicate: predicate,
 		skip:      true,
 	})

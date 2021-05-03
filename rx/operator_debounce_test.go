@@ -1,4 +1,4 @@
-package observer_test
+package rx_test
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/botchris/observer"
+	"github.com/botchris/observer/rx"
 	"github.com/stretchr/testify/require"
 )
 
@@ -16,7 +17,7 @@ func TestOperable_Debounce(t *testing.T) {
 	defer cancel()
 
 	prop := observer.NewProperty(nil)
-	stream := observer.MakeOperable(ctx, prop.Observe()).Debounce(100 * time.Millisecond)
+	stream := rx.MakeOperable(ctx, prop.Observe()).Debounce(100 * time.Millisecond)
 
 	var wg sync.WaitGroup
 

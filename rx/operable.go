@@ -1,22 +1,31 @@
-package observer
+package rx
 
 import (
 	"context"
 	"io"
 	"sync"
+
+	"github.com/botchris/observer"
 )
 
-// Operable defines a stream to which operators can be applied.
+// Operable defines a wrapped stream (input) on which operators can be applied to.
+// Operable Streams live as long as the underlying context remains active. If context ends or gets
+// cancelled operable will emit a io.EOF and no further items will be emitted.
 type Operable struct {
+	observer.Stream
 	ctx   context.Context
-	input Stream
+	input observer.Stream
 
-	mu        sync.RWMutex
-	running   bool
-	done      chan struct{}
-	output    Stream
-	operators []operator
-	surrogate Property
+	mu         sync.RWMutex
+	running    bool
+	completed  bool
+	done       chan struct{}
+	output     observer.Stream
+	operators  []operator
+	surrogate  observer.Property
+	onStart    func()
+	onNext     func(interface{})
+	onComplete func()
 }
 
 // operator represents a component capable to altering/transforming the flow of items emitted by a source Stream.
@@ -57,40 +66,7 @@ func rcv(src <-chan interface{}, defaultValue interface{}) interface{} {
 	return defaultValue
 }
 
-// MakeOperable makes the given input Stream operable so operators can be applied to. This new operable instance will be
-// valid as long as the given context keeps active.
-//
-// By default operable streams are created in "Lazy" mode, which means they won't start reading  the input Stream until
-// the operable itself is "consumed" (calls to any Stream interface method). This is specially useful when
-// chaining multiple operators at once, so your "operators pipeline" is correctly defined upfront.
-func MakeOperable(ctx context.Context, input Stream, opts ...Option) *Operable {
-	p := NewProperty(nil)
-	o := &Operable{
-		ctx:   ctx,
-		input: input.Clone(),
-
-		done:      make(chan struct{}),
-		output:    p.Observe(),
-		operators: make([]operator, 0),
-		surrogate: p,
-	}
-
-	options := &options{
-		startMode: Lazy,
-	}
-
-	for _, o := range opts {
-		o.apply(options)
-	}
-
-	if options.startMode == Eager {
-		o.Start()
-	}
-
-	return o
-}
-
-// Start starts
+// Start starts reading the input stream, it will no-op if already started.
 func (o *Operable) Start() *Operable {
 	o.mu.Lock()
 	defer o.mu.Unlock()
@@ -104,6 +80,40 @@ func (o *Operable) Start() *Operable {
 
 	<-ready
 	o.running = true
+
+	if o.onStart != nil {
+		o.onStart()
+	}
+
+	return o
+}
+
+// OnStart registers a callback action that will be called once the Operable starts reading the input Stream.
+func (o *Operable) OnStart(startFunc func()) *Operable {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+
+	o.onStart = startFunc
+
+	return o
+}
+
+// OnComplete registers a callback action that will be called after Next is invoked and reaches a io.EOF state.
+func (o *Operable) OnComplete(completedFunc func()) *Operable {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+
+	o.onComplete = completedFunc
+
+	return o
+}
+
+// OnNext registers a callback action that will be called each time Next method is invoked.
+func (o *Operable) OnNext(nextFunc func(interface{})) *Operable {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+
+	o.onNext = nextFunc
 
 	return o
 }
@@ -127,7 +137,16 @@ func (o *Operable) Changes() chan struct{} {
 func (o *Operable) Next() interface{} {
 	o.Start()
 
-	return o.output.Next()
+	value := o.output.Next()
+	if o.onNext != nil && value != io.EOF {
+		o.onNext(value)
+	}
+
+	if value == io.EOF {
+		o.complete()
+	}
+
+	return value
 }
 
 // Done returns a channel that's closed when Operable stops running. A "done" operator will emit no further items.
@@ -137,36 +156,62 @@ func (o *Operable) Done() <-chan struct{} {
 	return o.done
 }
 
-// HasNext checks whether there is a new value available.
-func (o *Operable) HasNext() bool {
-	o.Start()
-
-	return o.output.HasNext()
-}
-
-// WaitNext waits for Changes to be closed, advances the stream and returns
-// the current value.
-func (o *Operable) WaitNext() interface{} {
-	o.Start()
-
-	return o.output.WaitNext()
-}
-
 // Clone creates a copy of this stream
-func (o *Operable) Clone() Stream {
+func (o *Operable) Clone() observer.Stream {
 	o.Start()
 
 	return o.output.Clone()
 }
 
+// ToSlice collects every emitted item until EOF is reached an returns an slice holding each collected item.
+func (o *Operable) ToSlice() []interface{} {
+	defer o.complete()
+	out := make([]interface{}, 0)
+	done := o.ctx.Done()
+	for {
+		select {
+		case <-done:
+			return out
+		case <-o.Changes():
+			v := o.Next()
+			if v == io.EOF {
+				return out
+			}
+
+			out = append(out, v)
+		}
+	}
+}
+
+// ToMap convert the sequence of emitted items into a map keyed by a specified key function.
+func (o *Operable) ToMap(keySelector Mapper) map[interface{}]interface{} {
+	defer o.complete()
+	out := make(map[interface{}]interface{})
+	done := o.ctx.Done()
+	for {
+		select {
+		case <-done:
+			return out
+		case <-o.Changes():
+			v := o.Next()
+			if v == io.EOF {
+				return out
+			}
+
+			key := keySelector(o.ctx, v)
+			out[key] = v
+		}
+	}
+}
+
 func (o *Operable) run(ready chan struct{}) {
 	defer func() {
 		o.surrogate.Update(io.EOF)
-		close(o.done)
+		o.complete()
 	}()
 
 	close(ready)
-
+	done := o.ctx.Done()
 	for {
 		select {
 		case <-o.input.Changes():
@@ -204,8 +249,24 @@ func (o *Operable) run(ready chan struct{}) {
 			if !stopped {
 				o.surrogate.Update(value)
 			}
-		case <-o.ctx.Done():
+		case <-done:
 			return
 		}
 	}
+}
+
+func (o *Operable) complete() {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+
+	if o.completed {
+		return
+	}
+
+	if o.onComplete != nil {
+		o.onComplete()
+	}
+
+	o.completed = true
+	close(o.done)
 }
