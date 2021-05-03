@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/christophercastro/observer"
+	"github.com/botchris/observer"
 )
 
 func runPublisher(prop observer.Property) {

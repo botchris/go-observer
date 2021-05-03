@@ -153,7 +153,7 @@ for a simple example on how to use multiple observers with a single updater.
 - `Buffer`: periodically gather items emitted into bundles and emit these bundles rather than emitting the items one at a time.
 - `Contains`: determine whether a particular item was emitted or not.
 - `Debounce`: only emit an item if a particular timespan has passed without it emitting another item.
-- `Debounce`: emit only those items that pass a predicate test.
+- `Filter`: emit only those items that pass a predicate test.
 - `Map`: transform the items by applying a function to each item.
 - `Concat`: emit the emissions from two or more source streams without interleaving them.
 - `SkipWhile`: discard items until a specified condition becomes false.
