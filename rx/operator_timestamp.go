@@ -4,16 +4,16 @@ import (
 	"time"
 )
 
-type operatorTimestamp struct{}
+type operatorTimestamp[T any] struct{}
 
 // TimestampItem attach a timestamp to an item.
-type TimestampItem struct {
+type TimestampItem[T any] struct {
 	Timestamp time.Time
-	Item      interface{}
+	Item      T
 }
 
-func (o *operatorTimestamp) next(item interface{}, dst chan<- interface{}) bool {
-	send(dst, TimestampItem{
+func (o *operatorTimestamp[T]) next(item T, dst chan<- T) bool {
+	send[T](dst, TimestampItem[T]{
 		Timestamp: time.Now().UTC(),
 		Item:      item,
 	})
@@ -21,14 +21,14 @@ func (o *operatorTimestamp) next(item interface{}, dst chan<- interface{}) bool 
 	return true
 }
 
-func (o *operatorTimestamp) end(dst chan<- interface{}) {}
+func (o *operatorTimestamp[T]) end(dst chan<- T) {}
 
 // Timestamp attaches a timestamp to each item indicating when it was emitted.
-func (o *Operable) Timestamp() *Operable {
+func (o *Operable[T]) Timestamp() *Operable[T] {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 
-	o.operators = append(o.operators, &operatorTimestamp{})
+	o.operators = append(o.operators, &operatorTimestamp[T]{})
 
 	return o
 }

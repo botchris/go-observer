@@ -2,7 +2,7 @@ package observer
 
 import "testing"
 
-func testStateNew[T comparable](t *testing.T, state *state[T], val T) {
+func testStateNew(t *testing.T, state *state, val interface{}) {
 	if state.value != val {
 		t.Fatalf("Expecting %#v but got %#v\n", val, state.value)
 	}

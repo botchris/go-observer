@@ -26,7 +26,7 @@ func (o *operatorDistinctUntilChanged) next(item interface{}, dst chan<- interfa
 func (o *operatorDistinctUntilChanged) end(dst chan<- interface{}) {}
 
 // DistinctUntilChanged suppresses consecutive duplicate items.
-func (o *Operable) DistinctUntilChanged(apply Mapper) *Operable {
+func (o *Operable[T]) DistinctUntilChanged(apply Mapper) *Operable[T] {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 

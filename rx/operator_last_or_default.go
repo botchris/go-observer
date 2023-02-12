@@ -23,7 +23,7 @@ func (o *operatorLastOrDefault) end(dst chan<- interface{}) {
 }
 
 // LastOrDefault emit only the last item. If fails to emit any items, it emits a default value.
-func (o *Operable) LastOrDefault(defaultValue interface{}) *Operable {
+func (o *Operable[T]) LastOrDefault(defaultValue interface{}) *Operable[T] {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 

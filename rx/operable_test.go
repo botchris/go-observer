@@ -2,7 +2,6 @@ package rx_test
 
 import (
 	"context"
-	"io"
 	"testing"
 
 	"github.com/botchris/observer"
@@ -48,7 +47,7 @@ func TestOperable_OnComplete(t *testing.T) {
 	t.Run("GIVEN an operable WHEN emitter ends and context ends after THEN onComplete callback is invoked once", func(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 
-		prop := observer.NewProperty(nil)
+		prop := observer.NewProperty[int](-1)
 		onCompleteCalls := 0
 		operable := rx.MakeOperable(ctx, prop.Observe()).
 			OnComplete(func() {
@@ -71,7 +70,7 @@ func TestOperable_OnComplete(t *testing.T) {
 	t.Run("GIVEN an operable WHEN ctx ends suddenly while iterating THEN onComplete callback is invoked once", func(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 
-		prop := observer.NewProperty(nil)
+		prop := observer.NewProperty[int](-1)
 		onCompleteCalls := 0
 		operable := rx.MakeOperable(ctx, prop.Observe()).
 			OnComplete(func() {
@@ -89,7 +88,7 @@ func TestOperable_OnComplete(t *testing.T) {
 			cancel()
 			prop.End()
 
-			if v == io.EOF {
+			if v == 0 {
 				break
 			}
 		}

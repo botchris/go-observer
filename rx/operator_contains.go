@@ -30,7 +30,7 @@ func (o *operatorContains) end(dst chan<- interface{}) {
 }
 
 // Contains determine whether a particular item was emitted or not.
-func (o *Operable) Contains(predicate Predicate) *Operable {
+func (o *Operable[T]) Contains(predicate Predicate) *Operable[T] {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 

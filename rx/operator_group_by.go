@@ -1,29 +1,30 @@
 package rx
 
 import (
-	"io"
-
 	"github.com/botchris/observer"
 )
 
 // GroupBy divides an Operable into a set of Operable that each emit a different group of items from the original Operable, organized by key.
-func (o *Operable) GroupBy(length int, distribution func(item interface{}) int) *Operable {
+func (o *Operable[T]) GroupBy(length int, distribution func(item T) int) *Operable[T] {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 
-	root := observer.NewProperty(nil)
-	fork := MakeOperable(o.ctx, root.Observe())
-	properties := make([]observer.Property, length)
+	var def T
+
+	root := observer.NewProperty[T](def)
+	fork := MakeOperable[T](o.ctx, root.Observe())
+	properties := make([]observer.Property[T], length)
 
 	for i := 0; i < length; i++ {
-		p := observer.NewProperty(nil)
+		p := observer.NewProperty[T](def)
 		properties[i] = p
-		root.Update(MakeOperable(o.ctx, p.Observe()))
+		root.Update(MakeOperable[T](o.ctx, p.Observe()))
 	}
 
 	root.End()
 	ready := make(chan struct{})
 	done := o.ctx.Done()
+
 	go func() {
 		defer func() {
 			for i := 0; i < length; i++ {
@@ -39,7 +40,7 @@ func (o *Operable) GroupBy(length int, distribution func(item interface{}) int) 
 				return
 			case <-o.Changes():
 				value := o.Next()
-				if value == io.EOF {
+				if value == o.eof {
 					return
 				}
 

@@ -19,7 +19,7 @@ func (o *operatorLast) end(dst chan<- interface{}) {
 }
 
 // Last emit only the last item.
-func (o *Operable) Last() *Operable {
+func (o *Operable[T]) Last() *Operable[T] {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 

@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/imkira/go-observer/v2"
+	"github.com/botchris/observer"
 )
 
-func runPublisher(prop observer.Property[int]) {
-	val := prop.Value()
+func runPublisher(prop observer.Property) {
+	val := prop.Value().(int)
 	for {
 		time.Sleep(time.Second)
 		// update property
@@ -17,11 +17,11 @@ func runPublisher(prop observer.Property[int]) {
 	}
 }
 
-func runObserver(id int, prop observer.Property[int]) {
+func runObserver(id int, prop observer.Property) {
 	stream := prop.Observe()
 
 	for {
-		val := stream.Value()
+		val := stream.Value().(int)
 		fmt.Printf("Observer: %d, Value: %d\n", id, val)
 
 		select {

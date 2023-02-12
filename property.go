@@ -1,7 +1,6 @@
 package observer
 
 import (
-	"io"
 	"sync"
 )
 
@@ -13,20 +12,34 @@ type Property[T any] interface {
 	Value() T
 
 	// Update sets a new value for this property.
-	Update(value T)
+	Update(value ...T)
+
+	// End closes the property.
+	End()
 
 	// Observe returns a newly created Stream for this property.
 	Observe() Stream[T]
+
+	// Done returns a channel that is closed when property reaches a EOF
+	Done() <-chan struct{}
 }
 
-// NewProperty creates a new Property with the initial value value.
+// NewProperty creates a new Property with the initial value.
 // It returns the created Property.
 func NewProperty[T any](value T) Property[T] {
-	return &property[T]{state: newState(value)}
+	var eof T
+
+	return &property[T]{
+		eof:   eof,
+		state: newState[T](value),
+	}
 }
 
-type property[T any] struct {
+type property[T comparable] struct {
 	sync.RWMutex
+	eof   T
+	ended bool
+	done  chan struct{}
 	state *state[T]
 }
 
@@ -37,7 +50,7 @@ func (p *property[T]) Value() T {
 	return p.state.value
 }
 
-func (p *property[T]) Update(value T) {
+func (p *property[T]) Update(values ...T) {
 	p.Lock()
 	defer p.Unlock()
 
@@ -46,7 +59,7 @@ func (p *property[T]) Update(value T) {
 	}
 
 	for _, value := range values {
-		if value == io.EOF {
+		if value == p.eof {
 			p.ended = true
 			close(p.done)
 		}
@@ -58,13 +71,14 @@ func (p *property[T]) Update(value T) {
 func (p *property[T]) Observe() Stream[T] {
 	p.RLock()
 	defer p.RUnlock()
-	return &stream[T]{state: p.state}
+
+	return &stream{state: p.state}
 }
 
-func (p *property) End() {
-	p.Update(io.EOF)
+func (p *property[T]) End() {
+	p.Update(p.eof)
 }
 
-func (p *property) Done() <-chan struct{} {
+func (p *property[T]) Done() <-chan struct{} {
 	return p.done
 }

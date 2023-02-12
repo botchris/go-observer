@@ -15,10 +15,10 @@ func TestOperable_SkipWhile(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
-		prop := observer.NewProperty(nil)
-		stream := rx.MakeOperable(ctx, prop.Observe()).
-			SkipWhile(func(_ context.Context, v interface{}) bool {
-				return v.(int) <= 50
+		prop := observer.NewProperty[int](-1)
+		stream := rx.MakeOperable[int](ctx, prop.Observe()).
+			SkipWhile(func(_ context.Context, v int) bool {
+				return v <= 50
 			})
 
 		for i := 1; i <= 100; i++ {

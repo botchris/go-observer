@@ -22,7 +22,7 @@ func (o *operatorDebounce) next(item interface{}, dst chan<- interface{}) bool {
 func (o *operatorDebounce) end(dst chan<- interface{}) {}
 
 // Debounce only emit an item if a particular timespan has passed without it emitting another item.
-func (o *Operable) Debounce(timespan time.Duration) *Operable {
+func (o *Operable[T]) Debounce(timespan time.Duration) *Operable[T] {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 

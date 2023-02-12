@@ -9,7 +9,7 @@ func (o *operatorIgnoreElements) next(item interface{}, dst chan<- interface{}) 
 func (o *operatorIgnoreElements) end(dst chan<- interface{}) {}
 
 // IgnoreElements do not emit any items but mirror its termination notification.
-func (o *Operable) IgnoreElements() *Operable {
+func (o *Operable[T]) IgnoreElements() *Operable[T] {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 

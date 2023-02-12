@@ -4,14 +4,14 @@ import (
 	"context"
 )
 
-type operatorMin struct {
+type operatorMin[T comparable] struct {
 	ctx        context.Context
-	comparator Comparator
+	comparator Comparator[T]
 	empty      bool
-	max        interface{}
+	max        T
 }
 
-func (o *operatorMin) next(item interface{}, dst chan<- interface{}) bool {
+func (o *operatorMin[T]) next(item T, dst chan<- T) bool {
 	o.empty = false
 	if o.max == nil {
 		o.max = item
@@ -26,18 +26,18 @@ func (o *operatorMin) next(item interface{}, dst chan<- interface{}) bool {
 	return false
 }
 
-func (o *operatorMin) end(dst chan<- interface{}) {
+func (o *operatorMin[T]) end(dst chan<- T) {
 	if !o.empty {
 		send(dst, o.max)
 	}
 }
 
 // Min determines and emits the minimum-valued item according to a comparator.
-func (o *Operable) Min(comparator Comparator) *Operable {
+func (o *Operable[T]) Min(comparator Comparator[T]) *Operable[T] {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 
-	o.operators = append(o.operators, &operatorMin{
+	o.operators = append(o.operators, &operatorMin[T]{
 		ctx:        o.ctx,
 		comparator: comparator,
 		empty:      true,

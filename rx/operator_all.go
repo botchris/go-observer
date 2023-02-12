@@ -23,7 +23,7 @@ func (o *operatorAll) end(dst chan<- interface{}) {
 }
 
 // All determine whether all items emitted meet some criteria.
-func (o *Operable) All(predicate Predicate) *Operable {
+func (o *Operable[T]) All(predicate Predicate) *Operable[T] {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 

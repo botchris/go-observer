@@ -4,14 +4,14 @@ import (
 	"context"
 )
 
-type operatorMax struct {
+type operatorMax[T comparable] struct {
 	ctx        context.Context
-	comparator Comparator
+	comparator Comparator[T]
 	empty      bool
-	max        interface{}
+	max        T
 }
 
-func (o *operatorMax) next(item interface{}, dst chan<- interface{}) bool {
+func (o *operatorMax[T]) next(item T, dst chan<- T) bool {
 	o.empty = false
 	if o.max == nil {
 		o.max = item
@@ -26,18 +26,18 @@ func (o *operatorMax) next(item interface{}, dst chan<- interface{}) bool {
 	return false
 }
 
-func (o *operatorMax) end(dst chan<- interface{}) {
+func (o *operatorMax[T]) end(dst chan<- T) {
 	if !o.empty {
 		send(dst, o.max)
 	}
 }
 
 // Max determines and emits the maximum-valued item according to a comparator.
-func (o *Operable) Max(comparator Comparator) *Operable {
+func (o *Operable[T]) Max(comparator Comparator[T]) *Operable[T] {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 
-	o.operators = append(o.operators, &operatorMax{
+	o.operators = append(o.operators, &operatorMax[T]{
 		ctx:        o.ctx,
 		comparator: comparator,
 		empty:      true,

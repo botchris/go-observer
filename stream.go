@@ -30,13 +30,9 @@ type Stream[T any] interface {
 	// they may have different values depending on when they advance the stream
 	// with Next.
 	Clone() Stream[T]
-
-	// Peek return the value in the next state
-	// You should never call this unless Changes channel is closed.
-	Peek() T
 }
 
-type stream[T any] struct {
+type stream[T comparable] struct {
 	state *state[T]
 }
 
@@ -69,9 +65,6 @@ func (s *stream[T]) HasNext() bool {
 func (s *stream[T]) WaitNext() T {
 	<-s.state.done
 	s.state = s.state.next
-	return s.state.value
-}
 
-func (s *stream[T]) Peek() T {
-	return s.state.next.value
+	return s.state.value
 }

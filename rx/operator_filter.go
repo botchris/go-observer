@@ -22,7 +22,7 @@ func (o *operatorFilter) next(item interface{}, dst chan<- interface{}) bool {
 func (o *operatorFilter) end(dst chan<- interface{}) {}
 
 // Filter emit only those items that pass a predicate test.
-func (o *Operable) Filter(predicate Predicate) *Operable {
+func (o *Operable[T]) Filter(predicate Predicate) *Operable[T] {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 

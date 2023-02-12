@@ -26,7 +26,7 @@ func (o *operatorDistinct) next(item interface{}, dst chan<- interface{}) bool {
 func (o *operatorDistinct) end(dst chan<- interface{}) {}
 
 // Distinct suppresses duplicate items.
-func (o *Operable) Distinct(apply Mapper) *Operable {
+func (o *Operable[T]) Distinct(apply Mapper) *Operable[T] {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 

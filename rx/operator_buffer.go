@@ -28,7 +28,7 @@ func (o *operatorBufferWithCount) end(dst chan<- interface{}) {
 }
 
 // BufferWithCount periodically gather items emitted into bundles and emit these bundles rather than emitting the items one at a time.
-func (o *Operable) BufferWithCount(size int) *Operable {
+func (o *Operable[T]) BufferWithCount(size int) *Operable[T] {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 
