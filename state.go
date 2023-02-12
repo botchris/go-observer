@@ -6,7 +6,7 @@ type state[T any] struct {
 	done  chan struct{}
 }
 
-func newState[T any](value interface{}) *state[T] {
+func newState[T any](value T) *state[T] {
 	return &state[T]{
 		value: value,
 		done:  make(chan struct{}),

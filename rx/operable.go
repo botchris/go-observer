@@ -10,7 +10,7 @@ import (
 // Operable defines a wrapped stream (input) on which operators can be applied to.
 // Operable Streams live as long as the underlying context remains active. If context ends or gets
 // cancelled operable will emit a io.EOF and no further items will be emitted.
-type Operable[T comparable] struct {
+type Operable[T any] struct {
 	observer.Stream[T]
 	ctx   context.Context
 	input observer.Stream[T]

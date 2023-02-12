@@ -1,37 +1,37 @@
 package rx
 
 import (
-	"context"
+	"github.com/botchris/observer"
 )
 
-type operatorAll[T comparable] struct {
-	ctx       context.Context
+type allOperator[T any] struct {
+	observer.Property[T]
 	predicate Predicate[T]
-	all       bool
+	allMeet   bool
 }
 
-func (o *operatorAll[T]) next(item T, dst chan<- T) bool {
-	if !o.predicate(o.ctx, item) {
-		o.all = false
+type AllProperty[T any] interface {
+	AllMeet() bool
+	observer.Property[T]
+}
+
+func (o *allOperator[T]) AllMeet() bool {
+	return o.allMeet
+}
+
+// Update sets a new value for this property.
+func (o *allOperator[T]) Update(value ...T) {
+	for _, v := range value {
+		if o.allMeet && !o.predicate(v) {
+			o.allMeet = false
+		}
 	}
-
-	return false
 }
 
-func (o *operatorAll[T]) end(dst chan<- T) {
-	//send(dst, o.all)
-}
-
-// All determine whether all items emitted meet some criteria.
-func (o *Operable[T]) All(predicate Predicate[T]) *Operable[T] {
-	o.mu.Lock()
-	defer o.mu.Unlock()
-
-	o.operators = append(o.operators, &operatorAll[T]{
-		ctx:       o.ctx,
-		predicate: predicate,
-		all:       true,
-	})
-
-	return o
+func All[T any](pro observer.Property[T], pre Predicate[T]) AllProperty[T] {
+	return &allOperator[T]{
+		Property:  pro,
+		predicate: pre,
+		allMeet:   true,
+	}
 }

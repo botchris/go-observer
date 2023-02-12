@@ -50,6 +50,7 @@ func (s *stream[T]) Changes() chan struct{} {
 
 func (s *stream[T]) Next() T {
 	s.state = s.state.next
+
 	return s.state.value
 }
 

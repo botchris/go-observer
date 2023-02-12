@@ -32,6 +32,7 @@ func NewProperty[T any](value T) Property[T] {
 	return &property[T]{
 		eof:   eof,
 		state: newState[T](value),
+		done:  make(chan struct{}),
 	}
 }
 

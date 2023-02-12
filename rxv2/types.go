@@ -15,9 +15,3 @@ type (
 	// - A positive value if the first argument is greater than the second
 	Comparator[T comparable] func(a T, b T) int
 )
-
-// List of known starting strategies
-const (
-	Lazy  startStrategy = 0
-	Eager startStrategy = 1
-)
