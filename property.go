@@ -8,49 +8,36 @@ import (
 // Property is an object that is continuously updated by one or more
 // publishers. It is completely goroutine safe: you can use Property
 // concurrently from multiple goroutines.
-type Property interface {
+type Property[T any] interface {
 	// Value returns the current value for this property.
-	Value() interface{}
+	Value() T
 
-	// Update sets new values for this property.
-	// Updating with `io.EOF` will mark this property as "ended",
-	// once ended further calls to Update will no-op
-	Update(value ...interface{})
+	// Update sets a new value for this property.
+	Update(value T)
 
 	// Observe returns a newly created Stream for this property.
-	Observe() Stream
-
-	// End emits a io.EOF message, shortcut for `Property.Update(io.EOF)`
-	End()
-
-	// Done returns a channel that is closed when property reaches a EOF
-	Done() <-chan struct{}
+	Observe() Stream[T]
 }
 
 // NewProperty creates a new Property with the initial value value.
 // It returns the created Property.
-func NewProperty(value interface{}) Property {
-	return &property{
-		state: newState(value),
-		done:  make(chan struct{}),
-	}
+func NewProperty[T any](value T) Property[T] {
+	return &property[T]{state: newState(value)}
 }
 
-type property struct {
+type property[T any] struct {
 	sync.RWMutex
-	ended bool
-	done  chan struct{}
-	state *state
+	state *state[T]
 }
 
-func (p *property) Value() interface{} {
+func (p *property[T]) Value() T {
 	p.RLock()
 	defer p.RUnlock()
 
 	return p.state.value
 }
 
-func (p *property) Update(values ...interface{}) {
+func (p *property[T]) Update(value T) {
 	p.Lock()
 	defer p.Unlock()
 
@@ -68,10 +55,10 @@ func (p *property) Update(values ...interface{}) {
 	}
 }
 
-func (p *property) Observe() Stream {
+func (p *property[T]) Observe() Stream[T] {
 	p.RLock()
 	defer p.RUnlock()
-	return &stream{state: p.state}
+	return &stream[T]{state: p.state}
 }
 
 func (p *property) End() {

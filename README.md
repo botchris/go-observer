@@ -120,7 +120,7 @@ printed.
 
 ```go
 stream := prop.Observe()
-val := stream.Value().(int)
+val := stream.Value()
 fmt.Printf("initial value: %d\n", val)
 for {
   select {
@@ -129,7 +129,7 @@ for {
       // advance to next value
       stream.Next()
       // new value
-      val = stream.Value().(int)
+      val = stream.Value()
       fmt.Printf("got new value: %d\n", val)
   }
 }
