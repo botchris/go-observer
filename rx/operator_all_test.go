@@ -15,9 +15,9 @@ func TestOperable_All(t *testing.T) {
 	defer cancel()
 
 	t.Run("GIVEN an emitter of constant values WHEN all operator is applied for such value THEN bool true is emitted at the end", func(t *testing.T) {
-		prop := observer.NewProperty(nil)
-		stream := rx.MakeOperable(ctx, prop.Observe()).
-			All(func(_ context.Context, v interface{}) bool {
+		prop := observer.NewProperty[string]("")
+		stream := rx.MakeOperable[string](ctx, prop.Observe()).
+			All(func(_ context.Context, v string) bool {
 				return v == "yolo"
 			})
 
@@ -32,9 +32,9 @@ func TestOperable_All(t *testing.T) {
 	})
 
 	t.Run("GIVEN an emitter of constant values WHEN all operator is applied for another value THEN bool false is emitted at the end", func(t *testing.T) {
-		prop := observer.NewProperty(nil)
-		stream := rx.MakeOperable(ctx, prop.Observe()).
-			All(func(_ context.Context, v interface{}) bool {
+		prop := observer.NewProperty[string]("")
+		stream := rx.MakeOperable[string](ctx, prop.Observe()).
+			All(func(_ context.Context, v string) bool {
 				return v == "yolo"
 			})
 

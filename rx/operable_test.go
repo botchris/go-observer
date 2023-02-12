@@ -14,9 +14,9 @@ func TestOperable_OnComplete(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel()
 
-		prop := observer.NewProperty(nil)
+		prop := observer.NewProperty[int](-1)
 		onCompleteCalls := 0
-		operable := rx.MakeOperable(ctx, prop.Observe()).
+		operable := rx.MakeOperable[int](ctx, prop.Observe()).
 			OnComplete(func() {
 				onCompleteCalls++
 			})
@@ -30,9 +30,9 @@ func TestOperable_OnComplete(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel()
 
-		prop := observer.NewProperty(nil)
+		prop := observer.NewProperty[int](-1)
 		onCompleteCalls := 0
-		operable := rx.MakeOperable(ctx, prop.Observe()).
+		operable := rx.MakeOperable[int](ctx, prop.Observe()).
 			OnComplete(func() {
 				onCompleteCalls++
 			})

@@ -1,19 +1,19 @@
 package rx
 
-type operatorBufferWithCount struct {
+type operatorBufferWithCount[T any] struct {
 	size   int
 	count  int
 	buffer []interface{}
 }
 
-func (o *operatorBufferWithCount) next(item interface{}, dst chan<- interface{}) bool {
+func (o *operatorBufferWithCount[T]) next(item T, dst chan<- T) bool {
 	o.buffer[o.count] = item
 	o.count++
 
 	if o.count == o.size {
 		o.count = 0
 		send(dst, o.buffer)
-		o.buffer = make([]interface{}, o.size)
+		o.buffer = make([]T, o.size)
 
 		return true
 	}
@@ -21,7 +21,7 @@ func (o *operatorBufferWithCount) next(item interface{}, dst chan<- interface{})
 	return false
 }
 
-func (o *operatorBufferWithCount) end(dst chan<- interface{}) {
+func (o *operatorBufferWithCount[T]) end(dst chan<- T) {
 	if o.count != 0 {
 		send(dst, o.buffer[:o.count])
 	}
@@ -32,10 +32,10 @@ func (o *Operable[T]) BufferWithCount(size int) *Operable[T] {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 
-	o.operators = append(o.operators, &operatorBufferWithCount{
+	o.operators = append(o.operators, &operatorBufferWithCount[T]{
 		size:   size,
 		count:  0,
-		buffer: make([]interface{}, size),
+		buffer: make([]T, size),
 	})
 
 	return o

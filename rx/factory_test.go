@@ -2,7 +2,6 @@ package rx_test
 
 import (
 	"context"
-	"io"
 	"sync"
 	"testing"
 
@@ -13,10 +12,10 @@ import (
 
 func TestFactory_Concat(t *testing.T) {
 	ctx := context.Background()
-	p1 := observer.NewProperty(nil)
-	p2 := observer.NewProperty(nil)
+	p1 := observer.NewProperty[int](-1)
+	p2 := observer.NewProperty[int](-1)
 
-	stream := rx.Concat(ctx, []observer.Stream{p1.Observe(), p2.Observe()})
+	stream := rx.Concat(ctx, []observer.Stream[int]{p1.Observe(), p2.Observe()})
 
 	var wg sync.WaitGroup
 
@@ -50,11 +49,11 @@ func TestFactory_Concat(t *testing.T) {
 		<-stream.Changes()
 		v := stream.Next()
 
-		if v == io.EOF {
+		rcv = append(rcv, v)
+
+		if !stream.HasNext() {
 			break
 		}
-
-		rcv = append(rcv, v.(int))
 	}
 
 	require.Len(t, rcv, 20)

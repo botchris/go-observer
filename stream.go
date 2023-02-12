@@ -32,7 +32,7 @@ type Stream[T any] interface {
 	Clone() Stream[T]
 }
 
-type stream[T comparable] struct {
+type stream[T any] struct {
 	state *state[T]
 }
 

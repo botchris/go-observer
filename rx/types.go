@@ -9,7 +9,7 @@ type (
 	Predicate[T comparable] func(ctx context.Context, v T) bool
 
 	// Mapper defines a function that computes a value from an input value.
-	Mapper[T any] func(ctx context.Context, i T) T
+	Mapper[K, any, T comparable] func(ctx context.Context, i T) K
 
 	// Comparator defines a func that returns an int:
 	// - 0 if two elements are equals

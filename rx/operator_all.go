@@ -4,13 +4,13 @@ import (
 	"context"
 )
 
-type operatorAll struct {
+type operatorAll[T comparable] struct {
 	ctx       context.Context
-	predicate Predicate
+	predicate Predicate[T]
 	all       bool
 }
 
-func (o *operatorAll) next(item interface{}, dst chan<- interface{}) bool {
+func (o *operatorAll[T]) next(item T, dst chan<- T) bool {
 	if !o.predicate(o.ctx, item) {
 		o.all = false
 	}
@@ -18,16 +18,16 @@ func (o *operatorAll) next(item interface{}, dst chan<- interface{}) bool {
 	return false
 }
 
-func (o *operatorAll) end(dst chan<- interface{}) {
-	send(dst, o.all)
+func (o *operatorAll[T]) end(dst chan<- T) {
+	//send(dst, o.all)
 }
 
 // All determine whether all items emitted meet some criteria.
-func (o *Operable[T]) All(predicate Predicate) *Operable[T] {
+func (o *Operable[T]) All(predicate Predicate[T]) *Operable[T] {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 
-	o.operators = append(o.operators, &operatorAll{
+	o.operators = append(o.operators, &operatorAll[T]{
 		ctx:       o.ctx,
 		predicate: predicate,
 		all:       true,

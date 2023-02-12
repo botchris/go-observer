@@ -15,11 +15,11 @@ func TestOperable_GroupBy(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	prop := observer.NewProperty(nil)
+	prop := observer.NewProperty[int](-1)
 	count := 3
-	stream := rx.MakeOperable(ctx, prop.Observe()).
-		GroupBy(count, func(item interface{}) int {
-			return item.(int) % count
+	stream := rx.MakeOperable[int](ctx, prop.Observe()).
+		GroupBy(count, func(item int) int {
+			return item % count
 		})
 
 	max := 10
@@ -33,9 +33,9 @@ func TestOperable_GroupBy(t *testing.T) {
 
 	output := make([]int, 0)
 	for _, group := range groups {
-		require.IsType(t, &rx.Operable{}, group)
+		require.IsType(t, &rx.Operable[int]{}, group)
 
-		results := group.(*rx.Operable).ToSlice()
+		results := group.(*rx.Operable[int]).ToSlice()
 		fmt.Printf("new operable: %+v\n", results)
 		require.NotEmpty(t, results)
 

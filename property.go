@@ -35,7 +35,7 @@ func NewProperty[T any](value T) Property[T] {
 	}
 }
 
-type property[T comparable] struct {
+type property[T any] struct {
 	sync.RWMutex
 	eof   T
 	ended bool
@@ -59,11 +59,6 @@ func (p *property[T]) Update(values ...T) {
 	}
 
 	for _, value := range values {
-		if value == p.eof {
-			p.ended = true
-			close(p.done)
-		}
-
 		p.state = p.state.update(value)
 	}
 }
@@ -72,11 +67,11 @@ func (p *property[T]) Observe() Stream[T] {
 	p.RLock()
 	defer p.RUnlock()
 
-	return &stream{state: p.state}
+	return &stream[T]{state: p.state}
 }
 
 func (p *property[T]) End() {
-	p.Update(p.eof)
+	close(p.done)
 }
 
 func (p *property[T]) Done() <-chan struct{} {
