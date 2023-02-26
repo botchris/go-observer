@@ -60,13 +60,13 @@ stable.
 First, you need to install the package:
 
 ```
-go get -u github.com/christophercastro/go-observer
+go get -u github.com/botchris/go-observer
 ```
 
 Then, you need to include it in your source:
 
 ```go
-import "github.com/christophercastro/go-observer"
+import "github.com/botchris/go-observer"
 ```
 
 The package will be imported with ```observer``` as name.
