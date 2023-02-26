@@ -5,8 +5,8 @@ import (
 	"io"
 	"testing"
 
-	"github.com/botchris/observer"
-	"github.com/botchris/observer/rx"
+	"github.com/botchris/go-observer"
+	"github.com/botchris/go-observer/rx"
 	"github.com/stretchr/testify/require"
 )
 

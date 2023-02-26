@@ -3,7 +3,7 @@ package rx
 import (
 	"io"
 
-	"github.com/botchris/observer"
+	"github.com/botchris/go-observer"
 )
 
 // GroupBy divides an Operable into a set of Operable that each emit a different group of items from the original Operable, organized by key.

@@ -4,7 +4,7 @@ import (
 	"context"
 	"io"
 
-	"github.com/botchris/observer"
+	"github.com/botchris/go-observer"
 )
 
 // MakeOperable makes the given input Stream operable so operators can be applied to. This new operable instance will be

@@ -5,7 +5,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/botchris/observer"
+	"github.com/botchris/go-observer"
 )
 
 // Operable defines a wrapped stream (input) on which operators can be applied to.
